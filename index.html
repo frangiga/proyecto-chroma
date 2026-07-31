@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TERMINAL C.H.R.O.M.A. - Misión de Encriptación</title>
+    <style>
+        :root {
+            --bg-color: #0f1115;
+            --panel-color: #1a1d24;
+            --text-green: #33ff33;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            user-select: none;
+        }
+
+        .terminal-container {
+            background: var(--panel-color);
+            border: 4px solid #2a2f3a;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 15px rgba(255,255,255,0.05);
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .screen {
+            background: #051505;
+            border: 2px solid #114411;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 10px rgba(0,255,0,0.2);
+        }
+
+        .screen h1 {
+            font-size: 1rem;
+            color: var(--text-green);
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 5px var(--text-green);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .status-text {
+            font-size: 0.85rem;
+            color: #aaddaa;
+            min-height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+        }
+
+        /* Cuadrante de botones */
+        .pad-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn-pad {
+            height: 110px;
+            border-radius: 50%;
+            border: 5px solid #111;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.1s ease;
+            box-shadow: 0 5px 0 #000, 0 8px 15px rgba(0,0,0,0.6);
+            position: relative;
+        }
+
+        .btn-pad:active, .btn-pad.active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #000, 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        /* Colores */
+        #red { background: radial-gradient(circle, #8b0000 0%, #4a0000 100%); }
+        #red.active { background: radial-gradient(circle, #ff4d4d 0%, #ff0000 100%); box-shadow: 0 0 25px #ff0000; }
+
+        #blue { background: radial-gradient(circle, #00008b 0%, #00004a 100%); }
+        #blue.active { background: radial-gradient(circle, #4d4dff 0%, #0000ff 100%); box-shadow: 0 0 25px #0000ff; }
+
+        #yellow { background: radial-gradient(circle, #8b8b00 0%, #4a4a00 100%); }
+        #yellow.active { background: radial-gradient(circle, #ffff4d 0%, #ffff00 100%); box-shadow: 0 0 25px #ffff00; }
+
+        #green { background: radial-gradient(circle, #008b00 0%, #004a00 100%); }
+        #green.active { background: radial-gradient(circle, #4dff4d 0%, #00ff00 100%); box-shadow: 0 0 25px #00ff00; }
+
+        /* Botón Start */
+        .control-btn {
+            background: #222;
+            color: var(--text-green);
+            border: 2px solid var(--text-green);
+            padding: 12px 20px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .control-btn:hover {
+            background: var(--text-green);
+            color: #000;
+        }
+
+        /* Panel Final Secreto */
+        .secret-coords {
+            display: none;
+            background: #051505;
+            border: 2px dashed var(--text-green);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            color: var(--text-green);
+        }
+
+        .qr-img {
+            width: 180px;
+            height: 180px;
+            border: 3px solid var(--text-green);
+            border-radius: 8px;
+            margin: 10px 0;
+            background: #fff;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="terminal-container">
+    <div class="screen">
+        <h1>[ AGENCIA C.H.R.O.M.A. ]</h1>
+        <div class="status-text" id="status">PULSA "INICIAR MISIÓN" PARA INICIAR LA DECODIFICACIÓN</div>
+    </div>
+
+    <div class="pad-grid">
+        <div class="btn-pad" id="red" onclick="handleUserClick('red')"></div>
+        <div class="btn-pad" id="blue" onclick="handleUserClick('blue')"></div>
+        <div class="btn-pad" id="yellow" onclick="handleUserClick('yellow')"></div>
+        <div class="btn-pad" id="green" onclick="handleUserClick('green')"></div>
+    </div>
+
+    <button class="control-btn" id="start-btn" onclick="startGame()">INICIAR MISIÓN</button>
+
+    <div class="secret-coords" id="coords-box">
+        <strong>¡ACREDITACIÓN DE AGENTE CONCEDIDA!</strong><br><br>
+        <span style="font-size: 0.85rem;">ESCANEA O PULSA EN EL CÓDIGO QR PARA OBTENER LA INFORMACIÓN FINAL:</span><br>
+        
+        <!-- Aquí carga la imagen de tu QR subida al repositorio -->
+        <a href="qr.png" target="_blank">
+            <img src="qr.png" alt="Código QR Secreto" class="qr-img">
+        </a>
+    </div>
+</div>
+
+<script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    const frequencies = {
+        red: 261.63,    // C4
+        blue: 329.63,   // E4
+        yellow: 392.00, // G4
+        green: 523.25   // C5
+    };
+
+    const colors = ['red', 'blue', 'yellow', 'green'];
+    let sequence = [];
+    let userStep = 0;
+    let currentLevel = 1;
+    const targetLengths = { 1: 3, 2: 5, 3: 7 };
+    let isPlayingSequence = false;
+
+    function playTone(color, duration = 300) {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'sawtooth';
+        osc.frequency.value = frequencies[color];
+        
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration / 1000);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration / 1000);
+
+        const btn = document.getElementById(color);
+        btn.classList.add('active');
+        setTimeout(() => btn.classList.remove('active'), duration - 50);
+    }
+
+    function updateStatus(text) {
+        document.getElementById('status').innerText = text;
+    }
+
+    function startGame() {
+        document.getElementById('start-btn').style.display = 'none';
+        document.getElementById('coords-box').style.display = 'none';
+        currentLevel = 1;
+        startLevel();
+    }
+
+    function startLevel() {
+        sequence = [];
+        userStep = 0;
+        const totalNotes = targetLengths[currentLevel];
+        updateStatus(`NIVEL ${currentLevel}/3: RECEPTOR SINTONIZANDO (${totalNotes} FRECUENCIAS)...`);
+        
+        for (let i = 0; i < totalNotes; i++) {
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            sequence.push(randomColor);
+        }
+
+        setTimeout(() => playSequence(), 1500);
+    }
+
+    function playSequence() {
+        isPlayingSequence = true;
+        let speed = 600 - (currentLevel * 70);
+
+        sequence.forEach((color, index) => {
+            setTimeout(() => {
+                playTone(color, speed - 100);
+                if (index === sequence.length - 1) {
+                    setTimeout(() => {
+                        isPlayingSequence = false;
+                        updateStatus(`NIVEL ${currentLevel}: REPITE LA SECUENCIA`);
+                    }, speed);
+                }
+            }, index * speed);
+        });
+    }
+
+    function handleUserClick(color) {
+        if (isPlayingSequence) return;
+
+        playTone(color, 250);
+
+        if (color === sequence[userStep]) {
+            userStep++;
+            if (userStep === sequence.length) {
+                if (currentLevel < 3) {
+                    updateStatus(`¡FASE ${currentLevel} COMPLETADA! ELEVANDO SEGURIDAD...`);
+                    currentLevel++;
+                    setTimeout(() => startLevel(), 1500);
+                } else {
+                    updateStatus("¡DESCRIPTACIÓN COMPLETADA CON ÉXITO!");
+                    document.getElementById('coords-box').style.display = 'block';
+                }
+            }
+        } else {
+            updateStatus("❌ ERROR EN LA FRECUENCIA. REINICIANDO TERMINAL...");
+            playErrorSound();
+            document.getElementById('start-btn').style.display = 'block';
+            document.getElementById('start-btn').innerText = 'REINTENTAR MISIÓN';
+        }
+    }
+
+    function playErrorSound() {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = 110;
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.5);
+    }
+</script>
+
+</body>
+</html>
